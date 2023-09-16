@@ -14,6 +14,7 @@ using System.IO;
 using BlazorHero.CleanArchitecture.Server.Filters;
 using BlazorHero.CleanArchitecture.Server.Managers.Preferences;
 using Microsoft.Extensions.Localization;
+using System.Text.Json.Serialization;
 
 namespace BlazorHero.CleanArchitecture.Server
 {
@@ -54,7 +55,9 @@ namespace BlazorHero.CleanArchitecture.Server
             services.AddInfrastructureMappings();
             services.AddHangfire(x => x.UseSqlServerStorage(_configuration.GetConnectionString("DefaultConnection")));
             services.AddHangfireServer();
-            services.AddControllers().AddValidators();
+            services.AddControllers().AddValidators().AddJsonOptions(x =>
+                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);           
+            
             services.AddExtendedAttributesValidators();
             services.AddExtendedAttributesHandlers();
             services.AddRazorPages();
@@ -69,7 +72,6 @@ namespace BlazorHero.CleanArchitecture.Server
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IStringLocalizer<Startup> localizer)
         {
-            app.UseForwarding(_configuration);
             app.UseExceptionHandling(env);
             app.UseHttpsRedirection();
             app.UseMiddleware<ErrorHandlerMiddleware>();
